@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <title>WebSocket Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+
+    <h1>WebSocket Demo</h1>
+
+    <div class="row">
+        <div class="col-md-6 col-xs-12">
+            <div class="alert alert-info">
+                <strong>Durum:</strong> <span id="status"></span>
+            </div>
+        </div>
+        <div class="col-md-6 col-xs-12">
+            <button class="btn btn-success" type="button" id="open">Bağlatıyı Aç</button>
+            <button class="btn btn-danger" type="button" id="close">Bağlantıyı Kapat</button>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Mesajlar</div>
+        <ul class="list-group" id="chat">
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-xs-12">
+
+            <div class="input-group">
+                <input class="form-control" type="text" id="message">
+
+                <div class="input-group-btn">
+                    <button class="btn btn-primary" type="button" id="send">Gönder</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment-with-locales.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/livestamp/1.1.2/livestamp.min.js"></script>
+
+<script>
+    function openConnection() {
+        socket = new WebSocket('ws://localhost:8080');
+
+        socket.onopen = function () {
+            $('#status').html('Bağlantı açıldı.');
+        };
+
+        socket.onmessage = function (e) {
+            var data = JSON.parse(e.data);
+
+            $('#chat').append(
+                    '<li class="list-group-item">' +
+                    '<span class="glyphicon glyphicon-arrow-right text-success"></span> ' +
+                    '<span class="badge" data-livestamp="' + data.time + '"></span>' +
+                    data.message +
+                    '</li>'
+            );
+        };
+
+        socket.onclose = function (e) {
+            /**
+             * @see http://tools.ietf.org/html/rfc6455#section-11.7
+             */
+            $('#status').html('Bağlantı kapandı (' + e.code + ')');
+        };
+
+        socket.onerror = function () {
+            $('#status').html('Hata oluştu.');
+        };
+    }
+
+    function sendMessage() {
+        if (socket && socket.readyState == WebSocket.OPEN) {
+            var message = $.trim($('#message').val());
+
+            if (message != '') {
+                $('#chat').append(
+                        '<li class="list-group-item"><span class="glyphicon glyphicon-arrow-left text-danger"></span> ' +
+                        message +
+                        '</li>'
+                );
+                socket.send(message);
+            }
+
+            $('#message').val('');
+        }
+    }
+
+    var socket;
+
+    $(document).ready(function () {
+        /**
+         * Force momentjs locale.
+         */
+        moment.locale('tr');
+
+        openConnection();
+
+        $('#message').on('keypress', function (e) {
+            if (e.keyCode == 13) {
+                sendMessage();
+            }
+        });
+
+        $('#send').on('click', function () {
+            sendMessage();
+        });
+
+        $('#open').on('click', function () {
+            if (socket && socket.readyState != WebSocket.CLOSED) {
+                $('#status').html('Bağlantı zaten açık.');
+                return;
+            }
+
+            openConnection();
+        });
+
+        $('#close').on('click', function () {
+            socket.close();
+        });
+    });
+</script>
+</body>
+</html>
