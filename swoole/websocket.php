@@ -22,7 +22,9 @@ $websocketServer->on('message', function ($server, $frame) {
         'message' => $frame->data,
     ]);
 
-    $server->push($frame->fd, $data);
+    foreach ($server->connections as $client) {
+        $server->push($client, $data);
+    }
 });
 
 $websocketServer->start();
