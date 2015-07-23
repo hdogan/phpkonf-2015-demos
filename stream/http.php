@@ -25,3 +25,5 @@ for (;;) {
         fclose($clientSocket);
     }
 }
+
+fclose($serverSocket);
