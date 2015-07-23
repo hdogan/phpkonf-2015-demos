@@ -5,6 +5,12 @@
     <title>WebSocket Demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        #chat {
+            max-height: 300px;
+            overflow: scroll;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -67,6 +73,7 @@
                     data.message +
                     '</li>'
             );
+            $('#chat').scrollTop($('#chat')[0].scrollHeight);
         };
 
         socket.onclose = function (e) {
@@ -91,6 +98,7 @@
                         message +
                         '</li>'
                 );
+                $('#chat').scrollTop($('#chat')[0].scrollHeight);
                 socket.send(message);
             }
 
