@@ -4,6 +4,10 @@
  *
  * @see https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
  */
+
+/**
+ * 1. Create a socket.
+ */
 if (($serverSocket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
     die(socket_strerror(socket_last_error()));
 }
@@ -12,14 +16,23 @@ socket_set_option($serverSocket, SOL_SOCKET, SO_REUSEADDR, 1);
 
 $portNumber = 3000;
 
+/**
+ * 2. Bind an IP address and port number.
+ */
 if (!socket_bind($serverSocket, '127.0.0.1', $portNumber)) {
     die(socket_strerror(socket_last_error()));
 }
 
+/**
+ * 3. Listen
+ */
 if (!socket_listen($serverSocket, 5)) {
     die(socket_strerror(socket_last_error()));
 }
 
+/**
+ * Switch to non-blocking mode.
+ */
 socket_set_nonblock($serverSocket);
 
 $clients = [$serverSocket];
@@ -29,10 +42,16 @@ while (true) {
     $write = null;
     $except = null;
 
+    /**
+     * 4. Is something happening?
+     */
     if (socket_select($read, $write, $except, 1) < 1) {
         continue;
     }
 
+    /**
+     * 5. Accept if there is a new connection.
+     */
     if (in_array($serverSocket, $read)) {
         if (($newClient = socket_accept($serverSocket)) === false) {
             die(socket_strerror(socket_last_error()));
@@ -46,6 +65,9 @@ while (true) {
         unset($read[$serverKey]);
     }
 
+    /**
+     * 6. Read / Write / Close
+     */
     foreach ($read as $readSocket) {
         $clientKey = array_search($readSocket, $clients);
 
