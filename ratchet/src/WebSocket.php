@@ -17,7 +17,7 @@ class WebSocket implements MessageComponentInterface {
     public function onMessage(ConnectionInterface $from, $message) {
         $data = [
             'time' => time(),
-            'message' => $message,
+            'message' => htmlspecialchars($message, ENT_NOQUOTES|ENT_HTML5, 'UTF-8'),
         ];
 
         $from->send($data);

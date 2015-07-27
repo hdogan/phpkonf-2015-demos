@@ -19,7 +19,7 @@ $websocketServer->on('open', function($server, $request) {
 $websocketServer->on('message', function ($server, $frame) {
     $data = json_encode([
         'time' => time(),
-        'message' => $frame->data,
+        'message' => htmlspecialchars($frame->data, ENT_NOQUOTES|ENT_HTML5, 'UTF-8'),
     ]);
 
     foreach ($server->connections as $client) {
